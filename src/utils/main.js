@@ -3,6 +3,14 @@ import * as cheerio from 'cheerio';
 
 const WIKI_BASE_URL = 'https://en.wikipedia.org';
 
+export function toTitleCase(str) {
+	return str
+		.toLowerCase()
+		.split(' ')
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join(' ');
+}
+
 export function removeWS(words) {
 	return words.replace(/ /g, '_');
 }
@@ -45,9 +53,9 @@ export async function fetchWikipediaInfo(url) {
 		const body = await response.text();
 
 		const $ = cheerio.load(body);
-		return (
-			$('.infobox.biography.vcard').parent().html() || $('table.infobox.vcard').parent().html()
-		);
+		const infoboxContent = $('.infobox').parent().html();
+
+		return infoboxContent || '';
 	} catch (error) {
 		console.error(`Error fetching Wikipedia Infobox for URL "${url}":`, error);
 		return '';
@@ -57,7 +65,9 @@ export async function fetchWikipediaInfo(url) {
 // gets image from infobox
 export function extractInfoboxImageSrc(infoboxContent) {
 	const $ = cheerio.load(infoboxContent);
-	const imageUrl = $('img:first').attr('src');
+	const $infobox = $('.infobox');
+	const imageUrl = $infobox.find('img:first').attr('src');
+
 	return imageUrl ? 'https:' + imageUrl : '';
 }
 
@@ -67,21 +77,26 @@ export function doBlueLinkFieldsExist(infoboxContent) {
 
 	const areParentsLinked = $('th:contains("Parent")').next('td').find('a').length > 0;
 	const areRelativesLinked = $('th:contains("Relative")').next('td').find('a').length > 0;
+	const isMotherLinked = $('th:contains("Mother")').next('td').find('a').length > 0;
+	const isFatherLinked = $('th:contains("Father")').next('td').find('a').length > 0;
 
 	const blueLinkFieldsStatus = {
-		either: areParentsLinked || areRelativesLinked,
+		any: areParentsLinked || areRelativesLinked || isMotherLinked || isFatherLinked,
 		parent: areParentsLinked,
-		relative: areRelativesLinked
+		relative: areRelativesLinked,
+		mother: isMotherLinked,
+		father: isFatherLinked
 	};
 
 	return blueLinkFieldsStatus;
 }
 
 // gets parent links
-export function getParentLinks(infoboxContent) {
+export function getParentLinks(infoboxContent, searchTerm) {
 	const $ = cheerio.load(infoboxContent);
 
-	const $parentsData = $('th:contains("Parent")').next();
+	const safeSearchTerm = searchTerm.trim().replace(/([.*+?^${}()|[\]\\])/g, '\\$1');
+	const $parentsData = $(`th:contains("${safeSearchTerm}")`).next();
 
 	const parentsArray = [];
 	$parentsData.find('a').each(function () {
@@ -140,7 +155,11 @@ export async function getBlueLinkData(blueLinks) {
 			})
 		);
 
-		return results;
+		const filteredResults = results.filter(
+			(blueLink) => !blueLink.link.includes('https://en.wikipedia.org#cite_note')
+		);
+
+		return filteredResults;
 	} catch (error) {
 		console.error('Error retrieving Wikipedia Infobox links:', error);
 		return [];
