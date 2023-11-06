@@ -14,8 +14,6 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 	const image = extractInfoboxImageSrc(wikiInfo);
 	const doBlueLinksExist = doBlueLinkFieldsExist(wikiInfo);
 
-	console.log('image', image);
-
 	let blueLinks;
 	let blueLinksMother;
 	let blueLinksFather;
@@ -74,12 +72,12 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 		parents: processedBlueLinks
 	};
 
-	console.log('name', name);
-	console.log('do blue links exist', doBlueLinksExist);
-	console.log('hasLinks', hasLinks);
-	console.log('nepoRelationshipType', nepoRelationshipType);
-	console.log('nepo', processedBlueLinks.length > 0);
-	console.log('processedblueLinks', processedBlueLinks);
+	// console.log('name', name);
+	// console.log('do blue links exist', doBlueLinksExist);
+	// console.log('hasLinks', hasLinks);
+	// console.log('nepoRelationshipType', nepoRelationshipType);
+	// console.log('nepo', processedBlueLinks.length > 0);
+	// console.log('processedblueLinks', processedBlueLinks);
 
 	return poiResult;
 }

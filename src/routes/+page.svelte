@@ -2,41 +2,83 @@
 	import { enhance } from '$app/forms';
 
 	export let form;
+
 	let inputName;
+	let image;
+	let hasWiki;
+	let link;
+	let hasImage;
+	let nepo;
+	let nepoRelationshipType;
+	let parents;
+	let isLoading = false;
+	let showingContent = false;
 
 	$: if (form) {
 		inputName = form.data.name;
+		image = form.data.image;
+		hasWiki = form.data.hasWiki;
+		link = form.data.link;
+		hasImage = form.data.hasImage;
+		nepo = form.data.nepo;
+		nepoRelationshipType = form.data.nepoRelationshipType;
+		parents = form.data.parents;
 	}
+
+	$: if (form && form.data) {
+		// Form data is available, so stop loading and show the content.
+		isLoading = false;
+		showingContent = true;
+	}
+
+	$: console.log('isLoading', isLoading);
+	$: console.log('displayingContent', showingContent);
 </script>
 
-<form method="POST" action="/" use:enhance>
+<form
+	method="POST"
+	action="/"
+	use:enhance={() => {
+		isLoading = true;
+		showingContent = false;
+		return async ({ update }) => {
+			update();
+		};
+	}}
+>
 	<input name="name" placeholder="Enter name" type="text" required />
 	<button type="submit">Submit</button>
 </form>
 
-{#if form}
+{#if isLoading}
+	<p>Loading</p>
+{/if}
+
+{#if showingContent}
 	<h1>
-		is <a href={form.data.link} target="_blank">{inputName}</a> a nepo? {form.data.nepo}!
+		is
+
+		{#if hasWiki}
+			<a href={link} target="_blank">{inputName}</a>
+		{:else}
+			{inputName}
+		{/if} a nepo?
+
+		{nepo}!
 	</h1>
 
-	<!-- <p>{form.data.infobox}</p> -->
-	{#if form.data.image.length > 0}
+	{#if image.length > 0}
 		<div class="img-wrapper subj">
-			<img
-				src={form.data.image}
-				target="_blank"
-				alt="image of {form.data.name}"
-				class="circle-crop"
-			/>
+			<img src={image} target="_blank" alt="image of {name}" class="circle-crop" />
 		</div>
 	{/if}
 
-	{#if form.data.nepo}
+	{#if nepo}
 		<p>
-			See {form.data.name}'s {form.data.nepoRelationshipType}
-			{#if form.data.parents.length > 1}s
+			See {inputName}'s {nepoRelationshipType}
+			{#if parents.length > 1}s
 			{/if}:
-			{#each form.data.parents as parent}
+			{#each parents as parent}
 				<p><a href={parent.link} target="_blank">{parent.name}</a></p>
 				<!-- <p>{parent.link}</p> -->
 				{#if parent.image.length > 0}
@@ -59,7 +101,7 @@
 		width: 200px;
 		height: 200px;
 		position: relative;
-		border: 8px solid black;
+		border: 4px solid black;
 		-webkit-border-radius: 1000px;
 		-moz-border-radius: 1000px;
 		border-radius: 1000px;
