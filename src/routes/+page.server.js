@@ -14,48 +14,34 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 	const image = extractInfoboxImageSrc(wikiInfo);
 	const doBlueLinksExist = doBlueLinkFieldsExist(wikiInfo);
 
-	let blueLinks;
-	let blueLinksMother;
-	let blueLinksFather;
+	let blueLinks = [];
 	let processedBlueLinks;
-	let nepoRelationshipType;
 	let hasLinks;
 
+	// Collect links for each true condition.
 	if (doBlueLinksExist.parent) {
-		// if parents are blue linked only get parents
-		blueLinks = getParentLinks(wikiInfo, 'Parent');
-		nepoRelationshipType = 'parent';
-		hasLinks = true;
-	} else if (doBlueLinksExist.relative && !doBlueLinksExist.parent) {
-		// nepo by relatives but not by parent
-		blueLinks = getRelativeLinks(wikiInfo);
-		hasLinks = blueLinks.length > 0;
-		nepoRelationshipType = hasLinks ? 'relative' : 'none';
-	} else if (doBlueLinksExist.mother && !doBlueLinksExist.father) {
-		// mother field
-		blueLinks = getParentLinks(wikiInfo, 'Mother');
-		nepoRelationshipType = 'parent';
-		hasLinks = true;
-	} else if (!doBlueLinksExist.mother && doBlueLinksExist.father) {
-		// father field
-		blueLinks = getParentLinks(wikiInfo, 'Father');
-		nepoRelationshipType = 'parent';
-		hasLinks = true;
-	} else if (doBlueLinksExist.mother && doBlueLinksExist.father) {
-		// mother and father field
-		blueLinksMother = getParentLinks(wikiInfo, 'Father');
-		blueLinksFather = getParentLinks(wikiInfo, 'Mother');
-		blueLinks = blueLinksMother.concat(blueLinksFather);
-
-		nepoRelationshipType = 'parent';
-		hasLinks = true;
-	} else if (!doBlueLinksExist.any) {
-		// none of the fields
-		nepoRelationshipType = 'none';
-		hasLinks = false;
+		let parentLinks = getParentLinks(wikiInfo, 'Parent');
+		blueLinks = blueLinks.concat(parentLinks);
 	}
 
-	if (hasLinks) {
+	if (doBlueLinksExist.mother) {
+		let motherLinks = getParentLinks(wikiInfo, 'Mother');
+		blueLinks = blueLinks.concat(motherLinks);
+	}
+
+	if (doBlueLinksExist.father) {
+		let fatherLinks = getParentLinks(wikiInfo, 'Father');
+		blueLinks = blueLinks.concat(getParentLinks(wikiInfo, 'Father'));
+	}
+
+	if (doBlueLinksExist.relative) {
+		let relativeLinks = getRelativeLinks(wikiInfo);
+		if (relativeLinks.length > 0) {
+			blueLinks = blueLinks.concat(relativeLinks);
+		}
+	}
+
+	if (blueLinks.length > 0) {
 		processedBlueLinks = await getBlueLinkData(blueLinks);
 	} else {
 		processedBlueLinks = [];
@@ -68,16 +54,8 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 		hasImage: image.length > 0,
 		image: image,
 		nepo: processedBlueLinks.length > 0,
-		nepoRelationshipType: nepoRelationshipType,
 		parents: processedBlueLinks
 	};
-
-	// console.log('name', name);
-	// console.log('do blue links exist', doBlueLinksExist);
-	// console.log('hasLinks', hasLinks);
-	// console.log('nepoRelationshipType', nepoRelationshipType);
-	// console.log('nepo', processedBlueLinks.length > 0);
-	// console.log('processedblueLinks', processedBlueLinks);
 
 	return poiResult;
 }
@@ -106,7 +84,6 @@ export const actions = {
 				hasImage: false,
 				image: '',
 				nepo: false,
-				nepoRelationshipType: 'none',
 				parents: []
 			};
 		}

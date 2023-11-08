@@ -104,7 +104,8 @@ export function getParentLinks(infoboxContent, searchTerm) {
 		let link = $(this).attr('href');
 		parentsArray.push({
 			name: name,
-			link: WIKI_BASE_URL + link
+			link: WIKI_BASE_URL + link,
+			relationshipType: searchTerm
 		});
 	});
 
@@ -135,7 +136,8 @@ export function getRelativeLinks(infoboxContent) {
 			if (isNepoRelationship) {
 				relativesArray.push({
 					name: name,
-					link: WIKI_BASE_URL + link
+					link: WIKI_BASE_URL + link,
+					relationshipType: 'relative'
 				});
 			}
 		});

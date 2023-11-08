@@ -1,6 +1,8 @@
 <script>
 	import { enhance } from '$app/forms';
 
+	import Tree from '../lib/components/Tree.svelte';
+
 	export let form;
 
 	let inputName;
@@ -26,13 +28,10 @@
 	}
 
 	$: if (form && form.data) {
-		// Form data is available, so stop loading and show the content.
 		isLoading = false;
 		showingContent = true;
+		console.log(form.data);
 	}
-
-	$: console.log('isLoading', isLoading);
-	$: console.log('displayingContent', showingContent);
 </script>
 
 <form
@@ -51,10 +50,12 @@
 </form>
 
 {#if isLoading}
-	<p>Loading</p>
+	<p>Googling it</p>
 {/if}
 
 {#if showingContent}
+	<Tree data={form.data} />
+
 	<h1>
 		is
 
@@ -75,9 +76,6 @@
 
 	{#if nepo}
 		<p>
-			See {inputName}'s {nepoRelationshipType}
-			{#if parents.length > 1}s
-			{/if}:
 			{#each parents as parent}
 				<p><a href={parent.link} target="_blank">{parent.name}</a></p>
 				<!-- <p>{parent.link}</p> -->
