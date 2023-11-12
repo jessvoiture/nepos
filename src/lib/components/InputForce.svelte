@@ -24,7 +24,8 @@
 		const nodes = [data, ...data.parents];
 		const links = data.parents.map((parent) => ({
 			source: data.name,
-			target: parent.name
+			target: parent.name,
+			relationship: parent.relationship
 		}));
 
 		// Create the SVG container
@@ -44,6 +45,7 @@
 			.force('center', d3.forceCenter(width / 2, height / 2))
 			.force('collide', d3.forceCollide(30));
 
+		console.log('link', links);
 		// Create links
 		const link = svg
 			.append('g')
@@ -51,7 +53,11 @@
 			.selectAll('line')
 			.data(links)
 			.join('line')
-			.attr('stroke-width', 2);
+			.attr('stroke-width', 2)
+			.attr('class', (d) => {
+				console.log('include solid', ['Mother', 'Father', 'Parents'].includes(d.relationship));
+				return ['Mother', 'Father', 'Parents'].includes(d.relationship) ? 'solid' : 'dashed';
+			});
 
 		// Create nodes
 		const node = svg
@@ -64,19 +70,20 @@
 			.attr('r', nodeRadius)
 			.attr('fill', 'lightblue');
 
+		// place image in each node
 		const defs = svg.append('defs');
 		nodes.forEach((node) => {
 			defs
 				.append('pattern')
-				.attr('id', 'image-' + node.name.replace(/\s/g, '-')) // Create a unique ID for the pattern
+				.attr('id', 'image-' + node.name.replace(/\s/g, '-'))
 				.attr('width', 1)
 				.attr('height', 1)
 				.append('image')
-				.attr('xlink:href', getImageLink(node)) // Assuming each node has an 'image' property
+				.attr('xlink:href', getImageLink(node))
 				.attr('width', imageSize) // Width of the image inside the pattern
 				.attr('height', imageSize) // Height of the image
-				.attr('x', imageXTranslation) // Adjust if necessary
-				.attr('y', imageYTranslation); // Adjust if necessary
+				.attr('x', imageXTranslation)
+				.attr('y', imageYTranslation);
 		});
 
 		// Apply the pattern to each node
@@ -134,3 +141,6 @@
 </script>
 
 <svg id="graph" />
+
+<style>
+</style>

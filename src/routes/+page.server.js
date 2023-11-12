@@ -19,7 +19,7 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 
 	// Collect links for each true condition.
 	if (doBlueLinksExist.parent) {
-		let parentLinks = getParentLinks(wikiInfo, 'Parent');
+		let parentLinks = getParentLinks(wikiInfo, 'Parents');
 		blueLinks = blueLinks.concat(parentLinks);
 	}
 
