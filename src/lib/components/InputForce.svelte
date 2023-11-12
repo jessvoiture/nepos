@@ -14,11 +14,17 @@
 		const width = 800,
 			height = 600;
 
-		let nodeRadius = 50;
-		let imageSize = nodeRadius * 3;
-		let imageXTranslation = -(nodeRadius / 2);
-		let imageYTranslation = -(nodeRadius / 10);
-		let linkLength = nodeRadius * 4;
+		let nodeRadiusNepo = 80;
+		let imageSizeNepo = nodeRadiusNepo * 3;
+		let imageXTranslationNepo = -(nodeRadiusNepo / 2);
+		let imageYTranslationNepo = -(nodeRadiusNepo / 10);
+
+		let nodeRadiusLink = 40;
+		let imageSizeLink = nodeRadiusLink * 3;
+		let imageXTranslationLink = -(nodeRadiusLink / 2);
+		let imageYTranslationLink = -(nodeRadiusLink / 10);
+
+		let linkLength = nodeRadiusNepo * 2 + nodeRadiusLink * 2;
 
 		// Convert the data to a suitable format for D3
 		const nodes = [data, ...data.parents];
@@ -41,9 +47,9 @@
 					.id((d) => d.name)
 					.distance(linkLength)
 			)
-			.force('charge', d3.forceManyBody().strength(-75))
+			.force('charge', d3.forceManyBody().strength(-50))
 			.force('center', d3.forceCenter(width / 2, height / 2))
-			.force('collide', d3.forceCollide(30));
+			.force('collide', d3.forceCollide(10));
 
 		console.log('link', links);
 		// Create links
@@ -55,8 +61,9 @@
 			.join('line')
 			.attr('stroke-width', 2)
 			.attr('class', (d) => {
-				console.log('include solid', ['Mother', 'Father', 'Parents'].includes(d.relationship));
-				return ['Mother', 'Father', 'Parents'].includes(d.relationship) ? 'solid' : 'dashed';
+				return ['Mother', 'Father', 'Parents', 'Parent'].includes(d.relationship)
+					? 'solid'
+					: 'dashed';
 			});
 
 		// Create nodes
@@ -67,7 +74,9 @@
 			.selectAll('circle')
 			.data(nodes)
 			.join('circle')
-			.attr('r', nodeRadius)
+			.attr('r', (d) => {
+				return d.level == 'nepo' ? nodeRadiusNepo : nodeRadiusLink;
+			})
 			.attr('fill', 'lightblue');
 
 		// place image in each node
@@ -80,10 +89,10 @@
 				.attr('height', 1)
 				.append('image')
 				.attr('xlink:href', getImageLink(node))
-				.attr('width', imageSize) // Width of the image inside the pattern
-				.attr('height', imageSize) // Height of the image
-				.attr('x', imageXTranslation)
-				.attr('y', imageYTranslation);
+				.attr('width', node.level == 'nepo' ? imageSizeNepo : imageSizeLink)
+				.attr('height', node.level == 'nepo' ? imageSizeNepo : imageSizeLink)
+				.attr('x', node.level == 'nepo' ? imageXTranslationNepo : imageXTranslationLink)
+				.attr('y', node.level == 'nepo' ? imageYTranslationNepo : imageYTranslationLink);
 		});
 
 		// Apply the pattern to each node
@@ -141,6 +150,3 @@
 </script>
 
 <svg id="graph" />
-
-<style>
-</style>

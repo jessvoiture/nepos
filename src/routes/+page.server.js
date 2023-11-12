@@ -19,8 +19,13 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 
 	// Collect links for each true condition.
 	if (doBlueLinksExist.parent) {
-		let parentLinks = getParentLinks(wikiInfo, 'Parents');
+		let parentLinks = getParentLinks(wikiInfo, 'Parent');
 		blueLinks = blueLinks.concat(parentLinks);
+	}
+
+	if (doBlueLinksExist.parents) {
+		let parentsLinks = getParentLinks(wikiInfo, 'Parents');
+		blueLinks = blueLinks.concat(parentsLinks);
 	}
 
 	if (doBlueLinksExist.mother) {
@@ -60,7 +65,8 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 		hasImage: image.length > 0,
 		image: image,
 		nepo: processedBlueLinks.length > 0,
-		parents: processedBlueLinks
+		parents: processedBlueLinks,
+		level: 'nepo'
 	};
 
 	return poiResult;

@@ -75,15 +75,16 @@ export function extractInfoboxImageSrc(infoboxContent) {
 export function doBlueLinkFieldsExist(infoboxContent) {
 	const $ = cheerio.load(infoboxContent);
 
-	const areParentsLinked = $('th:contains("Parent")').next('td').find('a').length > 0;
+	const areParentsLinked = $('th:contains("Parents")').next('td').find('a').length > 0;
+	const areParentLinked = $('th:contains("Parent")').next('td').find('a').length > 0;
 	const areRelativesLinked = $('th:contains("Relative")').next('td').find('a').length > 0;
 	const isMotherLinked = $('th:contains("Mother")').next('td').find('a').length > 0;
 	const isFatherLinked = $('th:contains("Father")').next('td').find('a').length > 0;
 	const isFamilyLinked = $('th:contains("Family")').next('td').find('a').length > 0;
 
 	const blueLinkFieldsStatus = {
-		any: areParentsLinked || areRelativesLinked || isMotherLinked || isFatherLinked,
-		parent: areParentsLinked,
+		parents: areParentsLinked,
+		parent: areParentLinked,
 		relative: areRelativesLinked,
 		mother: isMotherLinked,
 		father: isFatherLinked,
@@ -161,6 +162,7 @@ export async function getBlueLinkData(blueLinks) {
 
 				blueLink.image = image || '';
 				blueLink.hasImage = image.length > 0;
+				blueLink.level = 'nepo_link';
 				return blueLink;
 			})
 		);
