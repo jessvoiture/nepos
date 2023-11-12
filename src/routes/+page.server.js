@@ -21,21 +21,22 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 	if (doBlueLinksExist.parent) {
 		let parentLinks = getParentLinks(wikiInfo, 'Parent');
 		blueLinks = blueLinks.concat(parentLinks);
-	}
 
-	if (doBlueLinksExist.parents) {
-		let parentsLinks = getParentLinks(wikiInfo, 'Parents');
-		blueLinks = blueLinks.concat(parentsLinks);
+		console.log('parent', parentLinks);
 	}
 
 	if (doBlueLinksExist.mother) {
 		let motherLinks = getParentLinks(wikiInfo, 'Mother');
 		blueLinks = blueLinks.concat(motherLinks);
+
+		console.log('motherLinks', motherLinks);
 	}
 
 	if (doBlueLinksExist.father) {
 		let fatherLinks = getParentLinks(wikiInfo, 'Father');
 		blueLinks = blueLinks.concat(fatherLinks);
+
+		console.log('fatherLinks', fatherLinks);
 	}
 
 	if (doBlueLinksExist.relative) {
@@ -43,6 +44,8 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 		if (relativeLinks.length > 0) {
 			blueLinks = blueLinks.concat(relativeLinks);
 		}
+
+		console.log('relativeLinks', relativeLinks);
 	}
 
 	if (doBlueLinksExist.family) {
@@ -50,6 +53,8 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 		if (familyLinks.length > 0) {
 			console.log('family links', familyLinks);
 		}
+
+		console.log('familyLinks', familyLinks);
 	}
 
 	if (blueLinks.length > 0) {
