@@ -1,5 +1,6 @@
 <script>
 	import { enhance } from '$app/forms';
+	import InputForce from '../lib/components/InputForce.svelte';
 
 	export let form;
 
@@ -29,6 +30,8 @@
 		// Form data is available, so stop loading and show the content.
 		isLoading = false;
 		showingContent = true;
+
+		console.log(form.data);
 	}
 
 	$: console.log('isLoading', isLoading);
@@ -55,62 +58,5 @@
 {/if}
 
 {#if showingContent}
-	<h1>
-		is
-
-		{#if hasWiki}
-			<a href={link} target="_blank">{inputName}</a>
-		{:else}
-			{inputName}
-		{/if} a nepo?
-
-		{nepo}!
-	</h1>
-
-	{#if image.length > 0}
-		<div class="img-wrapper subj">
-			<img src={image} target="_blank" alt="image of {name}" class="circle-crop" />
-		</div>
-	{/if}
-
-	{#if nepo}
-		<p>
-			See {inputName}'s {nepoRelationshipType}
-			{#if parents.length > 1}s
-			{/if}:
-			{#each parents as parent}
-				<p><a href={parent.link} target="_blank">{parent.name}</a></p>
-				<!-- <p>{parent.link}</p> -->
-				{#if parent.image.length > 0}
-					<div class="img-wrapper parent">
-						<img
-							src={parent.image}
-							target="_blank"
-							alt="image of {parent.name}"
-							class="circle-crop"
-						/>
-					</div>
-				{/if}
-			{/each}
-		</p>
-	{/if}
+	<InputForce data={form.data} />
 {/if}
-
-<style>
-	.img-wrapper {
-		width: 200px;
-		height: 200px;
-		position: relative;
-		border: 4px solid black;
-		-webkit-border-radius: 1000px;
-		-moz-border-radius: 1000px;
-		border-radius: 1000px;
-		overflow: hidden;
-	}
-	.circle-crop {
-		display: block;
-		margin: 0 auto;
-		height: auto;
-		width: 100%;
-	}
-</style>

@@ -1,0 +1,136 @@
+<script>
+	import { onMount } from 'svelte';
+	import * as d3 from 'd3';
+
+	export let data;
+
+	const getImageLink = function (d) {
+		const imagePath = d.hasImage > 0 ? d.image : '/images/noImage.jpg';
+
+		return imagePath;
+	};
+
+	onMount(() => {
+		const width = 800,
+			height = 600;
+
+		let nodeRadius = 50;
+		let imageSize = nodeRadius * 3;
+		let imageXTranslation = -(nodeRadius / 2);
+		let imageYTranslation = -(nodeRadius / 10);
+		let linkLength = nodeRadius * 4;
+
+		// Convert the data to a suitable format for D3
+		const nodes = [data, ...data.parents];
+		const links = data.parents.map((parent) => ({
+			source: data.name,
+			target: parent.name
+		}));
+
+		// Create the SVG container
+		const svg = d3.select('#graph').attr('width', width).attr('height', height);
+
+		// Create the simulation
+		const simulation = d3
+			.forceSimulation(nodes)
+			.force(
+				'link',
+				d3
+					.forceLink(links)
+					.id((d) => d.name)
+					.distance(linkLength)
+			)
+			.force('charge', d3.forceManyBody().strength(-75))
+			.force('center', d3.forceCenter(width / 2, height / 2))
+			.force('collide', d3.forceCollide(30));
+
+		// Create links
+		const link = svg
+			.append('g')
+			.attr('stroke', 'black')
+			.selectAll('line')
+			.data(links)
+			.join('line')
+			.attr('stroke-width', 2);
+
+		// Create nodes
+		const node = svg
+			.append('g')
+			.attr('stroke', 'black')
+			.attr('stroke-width', 2)
+			.selectAll('circle')
+			.data(nodes)
+			.join('circle')
+			.attr('r', nodeRadius)
+			.attr('fill', 'lightblue');
+
+		const defs = svg.append('defs');
+		nodes.forEach((node) => {
+			defs
+				.append('pattern')
+				.attr('id', 'image-' + node.name.replace(/\s/g, '-')) // Create a unique ID for the pattern
+				.attr('width', 1)
+				.attr('height', 1)
+				.append('image')
+				.attr('xlink:href', getImageLink(node)) // Assuming each node has an 'image' property
+				.attr('width', imageSize) // Width of the image inside the pattern
+				.attr('height', imageSize) // Height of the image
+				.attr('x', imageXTranslation) // Adjust if necessary
+				.attr('y', imageYTranslation); // Adjust if necessary
+		});
+
+		// Apply the pattern to each node
+		node.attr('fill', (d) => `url(#image-${d.name.replace(/\s/g, '-')})`);
+
+		// defs
+		// 	.selectAll('.node-text-path')
+		// 	.data(nodes)
+		// 	.enter()
+		// 	.append('path')
+		// 	.attr('id', (d) => `text-path-${d.name.replace(/\s/g, '-')}`)
+		// 	.attr(
+		// 		'd',
+		// 		(d) => `
+		//         M ${d.x - nodeRadius}, ${d.y}
+		//         a ${nodeRadius},${nodeRadius} 0 1,1 ${nodeRadius * 2},0
+		//         a ${nodeRadius},${nodeRadius} 0 1,1 -${nodeRadius * 2},0
+		//             `
+		// 	);
+
+		// Create text elements
+		// svg
+		// 	.selectAll('.node-text')
+		// 	.data(nodes)
+		// 	.enter()
+		// 	.append('text')
+		// 	.append('textPath')
+		// 	.attr('xlink:href', (d) => `#text-path-${d.name.replace(/\s/g, '-')}`)
+		// 	.style('text-anchor', 'middle')
+		// 	.attr('startOffset', '50%')
+		// 	.text((d) => d.name);
+
+		// Update positions on each tick
+		simulation.on('tick', () => {
+			link
+				.attr('x1', (d) => d.source.x)
+				.attr('y1', (d) => d.source.y)
+				.attr('x2', (d) => d.target.x)
+				.attr('y2', (d) => d.target.y);
+
+			node.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
+
+			// nodeLabel.attr('x', (d) => d.x + 8).attr('y', (d) => d.y);
+
+			// defs.selectAll('.node-text-path').attr(
+			// 	'd',
+			// 	(d) => `
+			//         M ${d.x - nodeRadius(d)}, ${d.y}
+			//         a ${nodeRadius(d)},${nodeRadius(d)} 0 1,1 ${nodeRadius(d) * 2},0
+			//         a ${nodeRadius(d)},${nodeRadius(d)} 0 1,1 -${nodeRadius(d) * 2},0
+			//         `
+			// );
+		});
+	});
+</script>
+
+<svg id="graph" />

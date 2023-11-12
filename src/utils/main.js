@@ -79,15 +79,18 @@ export function doBlueLinkFieldsExist(infoboxContent) {
 	const areRelativesLinked = $('th:contains("Relative")').next('td').find('a').length > 0;
 	const isMotherLinked = $('th:contains("Mother")').next('td').find('a').length > 0;
 	const isFatherLinked = $('th:contains("Father")').next('td').find('a').length > 0;
+	const isFamilyLinked = $('th:contains("Family")').next('td').find('a').length > 0;
 
 	const blueLinkFieldsStatus = {
 		any: areParentsLinked || areRelativesLinked || isMotherLinked || isFatherLinked,
 		parent: areParentsLinked,
 		relative: areRelativesLinked,
 		mother: isMotherLinked,
-		father: isFatherLinked
+		father: isFatherLinked,
+		family: isFamilyLinked
 	};
 
+	console.log('blue fields', blueLinkFieldsStatus);
 	return blueLinkFieldsStatus;
 }
 
@@ -104,7 +107,8 @@ export function getParentLinks(infoboxContent, searchTerm) {
 		let link = $(this).attr('href');
 		parentsArray.push({
 			name: name,
-			link: WIKI_BASE_URL + link
+			link: WIKI_BASE_URL + link,
+			relationship: searchTerm
 		});
 	});
 
@@ -112,13 +116,17 @@ export function getParentLinks(infoboxContent, searchTerm) {
 }
 
 // get relative links
-export function getRelativeLinks(infoboxContent) {
+export function getRelativeLinks(infoboxContent, searchTerm) {
 	const nonNepoRelationships = new RegExp(
 		'son|daughter|nephew|niece|grandson|grand-daughter|grandnephew|grandniece|in-law|stepson|stepdaughter|brother|sister|cousin'
 	);
 
 	const $ = cheerio.load(infoboxContent);
-	const $relativesData = $('th:contains("Relative")').next();
+
+	const safeSearchTerm = searchTerm.trim().replace(/([.*+?^${}()|[\]\\])/g, '\\$1');
+	const $relativesData = $(`th:contains("${safeSearchTerm}")`).next();
+
+	console.log('relsData', $relativesData.text());
 
 	const relativesArray = [];
 	$relativesData
@@ -135,7 +143,8 @@ export function getRelativeLinks(infoboxContent) {
 			if (isNepoRelationship) {
 				relativesArray.push({
 					name: name,
-					link: WIKI_BASE_URL + link
+					link: WIKI_BASE_URL + link,
+					relationship: searchTerm
 				});
 			}
 		});
@@ -151,6 +160,7 @@ export async function getBlueLinkData(blueLinks) {
 				const image = extractInfoboxImageSrc(fetchedInfo);
 
 				blueLink.image = image || '';
+				blueLink.hasImage = image.length > 0;
 				return blueLink;
 			})
 		);
