@@ -1,6 +1,7 @@
 <script>
 	import { enhance } from '$app/forms';
 	import InputForce from '../lib/components/InputForce.svelte';
+	import ForceWrapper from '../lib/components/ForceWrapper.svelte';
 
 	export let form;
 
@@ -59,4 +60,5 @@
 
 {#if showingContent}
 	<InputForce data={form.data} />
+	<!-- <ForceWrapper data={form.data} /> -->
 {/if}

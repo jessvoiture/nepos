@@ -8,7 +8,10 @@ export function toTitleCase(str) {
 		.toLowerCase()
 		.split(' ')
 		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-		.join(' ');
+		.join(' ')
+		.split('-')
+		.map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+		.join('-');
 }
 
 export function removeWS(words) {
@@ -19,7 +22,7 @@ export function removeWS(words) {
 export async function doesWikiExist(title) {
 	const endpoint =
 		WIKI_BASE_URL +
-		`/w/api.php?action=query&format=json&titles=${encodeURIComponent(title)}&origin=*`;
+		`/w/api.php?action=query&format=json&titles=${encodeURIComponent(title)}&origin=*&redirects=1`;
 
 	console.log('Title being checked:', title); // Log the title being queried
 
@@ -123,30 +126,27 @@ export function getRelativeLinks(infoboxContent, searchTerm) {
 	const $ = cheerio.load(infoboxContent);
 
 	const safeSearchTerm = searchTerm.trim().replace(/([.*+?^${}()|[\]\\])/g, '\\$1');
-	const $relativesData = $(`th:contains("${safeSearchTerm}")`).next();
-
-	console.log('relsData', $relativesData.text());
+	const $relativesData = $(`th:contains("${safeSearchTerm}"):first`).next();
 
 	const relativesArray = [];
-	$relativesData
-		.find('a')
-		.parent()
-		.each(function () {
-			let $a = $(this).find('a');
+	$relativesData.find('a').each(function () {
+		let $a = $(this);
 
-			let name = $a.text();
-			let link = $a.attr('href');
+		console.log('a text:', $a.text());
 
-			let isNepoRelationship = !nonNepoRelationships.test($(this).text());
+		let name = $a.text();
+		let link = $a.attr('href');
 
-			if (isNepoRelationship) {
-				relativesArray.push({
-					name: name,
-					link: WIKI_BASE_URL + link,
-					relationship: searchTerm
-				});
-			}
-		});
+		let isNepoRelationship = !nonNepoRelationships.test($a.parent().text());
+
+		if (isNepoRelationship) {
+			relativesArray.push({
+				name: name,
+				link: WIKI_BASE_URL + link,
+				relationship: searchTerm
+			});
+		}
+	});
 
 	return relativesArray;
 }

@@ -51,17 +51,29 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 	if (doBlueLinksExist.family) {
 		let familyLinks = getRelativeLinks(wikiInfo, 'Family');
 		if (familyLinks.length > 0) {
-			console.log('family links', familyLinks);
+			blueLinks = blueLinks.concat(familyLinks);
 		}
 
 		console.log('familyLinks', familyLinks);
 	}
 
 	if (blueLinks.length > 0) {
-		processedBlueLinks = await getBlueLinkData(blueLinks);
+		const compareObjects = (obj1, obj2) => {
+			// Compare based on a specific property, for example, 'id'
+			return obj1.name === obj2.name; // Change 'id' to the property you want to compare
+		};
+
+		// Use a Set to remove duplicates based on the comparison function
+		const uniqueBlueLinks = Array.from(new Set(blueLinks.map(JSON.stringify)), JSON.parse).filter(
+			(value, index, self) => self.findIndex((obj) => compareObjects(obj, value)) === index
+		);
+
+		processedBlueLinks = await getBlueLinkData(uniqueBlueLinks);
 	} else {
 		processedBlueLinks = [];
 	}
+
+	console.log('final blue links', processedBlueLinks);
 
 	const poiResult = {
 		name: name,
@@ -73,6 +85,8 @@ async function extractInfoboxData(wikiInfo, name, wikiUrl) {
 		parents: processedBlueLinks,
 		level: 'nepo'
 	};
+
+	console.log('data', poiResult);
 
 	return poiResult;
 }
@@ -95,7 +109,7 @@ export const actions = {
 			poiResult = await extractInfoboxData(wikiInfo, name, wikiUrl);
 		} else {
 			poiResult = {
-				name: name,
+				name: editedName,
 				hasWiki: false,
 				link: '',
 				hasImage: false,

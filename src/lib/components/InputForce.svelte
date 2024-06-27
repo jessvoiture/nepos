@@ -4,6 +4,8 @@
 
 	export let data;
 
+	const directNepoRelationship = ['Mother', 'Father', 'Parent'];
+
 	const getImageLink = function (d) {
 		const imagePath = d.hasImage > 0 ? d.image : '/images/noImage.jpg';
 
@@ -27,7 +29,16 @@
 		let linkLength = nodeRadiusNepo * 2 + nodeRadiusLink * 2;
 
 		// Convert the data to a suitable format for D3
-		const nodes = [data, ...data.parents];
+		const nodes = [data, ...data.parents].map((node) => {
+			return {
+				...node,
+				nodeRadius: node.level == 'nepo' ? nodeRadiusNepo : nodeRadiusLink,
+				imageSize: node.level == 'nepo' ? imageSizeNepo : imageSizeLink,
+				imageXTranslation: node.level == 'nepo' ? imageXTranslationNepo : imageXTranslationLink,
+				imageYTranslation: node.level == 'nepo' ? imageYTranslationNepo : imageYTranslationLink
+			};
+		});
+
 		const links = data.parents.map((parent) => ({
 			source: data.name,
 			target: parent.name,
@@ -49,9 +60,8 @@
 			)
 			.force('charge', d3.forceManyBody().strength(-50))
 			.force('center', d3.forceCenter(width / 2, height / 2))
-			.force('collide', d3.forceCollide(10));
+			.force('collide', d3.forceCollide().radius(nodeRadiusLink + 1));
 
-		console.log('link', links);
 		// Create links
 		const link = svg
 			.append('g')
@@ -61,9 +71,7 @@
 			.join('line')
 			.attr('stroke-width', 2)
 			.attr('class', (d) => {
-				return ['Mother', 'Father', 'Parents', 'Parent'].includes(d.relationship)
-					? 'solid'
-					: 'dashed';
+				return directNepoRelationship.includes(d.relationship) ? 'solid' : 'dashed';
 			});
 
 		// Create nodes
@@ -75,7 +83,7 @@
 			.data(nodes)
 			.join('circle')
 			.attr('r', (d) => {
-				return d.level == 'nepo' ? nodeRadiusNepo : nodeRadiusLink;
+				return d.nodeRadius;
 			})
 			.attr('fill', 'lightblue');
 
@@ -89,41 +97,14 @@
 				.attr('height', 1)
 				.append('image')
 				.attr('xlink:href', getImageLink(node))
-				.attr('width', node.level == 'nepo' ? imageSizeNepo : imageSizeLink)
-				.attr('height', node.level == 'nepo' ? imageSizeNepo : imageSizeLink)
-				.attr('x', node.level == 'nepo' ? imageXTranslationNepo : imageXTranslationLink)
-				.attr('y', node.level == 'nepo' ? imageYTranslationNepo : imageYTranslationLink);
+				.attr('width', node.imageSize)
+				.attr('height', node.imageSize)
+				.attr('x', node.imageXTranslation)
+				.attr('y', node.imageYTranslation);
 		});
 
 		// Apply the pattern to each node
 		node.attr('fill', (d) => `url(#image-${d.name.replace(/\s/g, '-')})`);
-
-		// defs
-		// 	.selectAll('.node-text-path')
-		// 	.data(nodes)
-		// 	.enter()
-		// 	.append('path')
-		// 	.attr('id', (d) => `text-path-${d.name.replace(/\s/g, '-')}`)
-		// 	.attr(
-		// 		'd',
-		// 		(d) => `
-		//         M ${d.x - nodeRadius}, ${d.y}
-		//         a ${nodeRadius},${nodeRadius} 0 1,1 ${nodeRadius * 2},0
-		//         a ${nodeRadius},${nodeRadius} 0 1,1 -${nodeRadius * 2},0
-		//             `
-		// 	);
-
-		// Create text elements
-		// svg
-		// 	.selectAll('.node-text')
-		// 	.data(nodes)
-		// 	.enter()
-		// 	.append('text')
-		// 	.append('textPath')
-		// 	.attr('xlink:href', (d) => `#text-path-${d.name.replace(/\s/g, '-')}`)
-		// 	.style('text-anchor', 'middle')
-		// 	.attr('startOffset', '50%')
-		// 	.text((d) => d.name);
 
 		// Update positions on each tick
 		simulation.on('tick', () => {
@@ -134,17 +115,6 @@
 				.attr('y2', (d) => d.target.y);
 
 			node.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
-
-			// nodeLabel.attr('x', (d) => d.x + 8).attr('y', (d) => d.y);
-
-			// defs.selectAll('.node-text-path').attr(
-			// 	'd',
-			// 	(d) => `
-			//         M ${d.x - nodeRadius(d)}, ${d.y}
-			//         a ${nodeRadius(d)},${nodeRadius(d)} 0 1,1 ${nodeRadius(d) * 2},0
-			//         a ${nodeRadius(d)},${nodeRadius(d)} 0 1,1 -${nodeRadius(d) * 2},0
-			//         `
-			// );
 		});
 	});
 </script>
