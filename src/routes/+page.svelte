@@ -4,7 +4,7 @@
 	import LookUp from '../lib/components/LookUp.svelte';
 	import Grid from '../lib/components/Grid.svelte';
 
-	export let form;
+	// export let form;
 	export let data;
 
 	let screenWidth;

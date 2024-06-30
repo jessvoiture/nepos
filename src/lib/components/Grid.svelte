@@ -1,4 +1,7 @@
 <script>
+	import { hoveredDatapoint, mouseX, mouseY } from '../stores';
+	import Tooltip from './Tooltip.svelte';
+
 	export let data;
 	export let screenHeight;
 	export let screenWidth;
@@ -47,22 +50,45 @@
 	$: adjustedRectSize = Math.min(rectSize, rectHeight);
 	$: rectPaddingX = (width - adjustedRectSize * columns) / (columns - 1);
 	$: rectPaddingY = (height - adjustedRectSize * rows) / (rows - 1);
+
+	const handleMouseover = function (event, d) {
+		hoveredDatapoint.set(d);
+		mouseX.set(event.clientX);
+		mouseY.set(event.clientY);
+	};
+
+	const handleMouseout = function () {
+		hoveredDatapoint.set(undefined);
+	};
 </script>
 
 <svg width={svgWidth} height={svgHeight}>
 	<g transform={`translate(${padding}, ${padding})`}>
-		{#each data as item, i}
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<!-- svelte-ignore a11y-mouse-events-have-key-events -->
+		{#each data as d, i}
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<rect
 				x={(i % columns) * (adjustedRectSize + rectPaddingX)}
 				y={Math.floor(i / columns) * (adjustedRectSize + rectPaddingY)}
 				width={adjustedRectSize}
 				height={adjustedRectSize}
 				fill="blue"
+				stroke={$hoveredDatapoint && $hoveredDatapoint.id === d.id ? 'red' : 'none'}
+				on:mouseover={function (event) {
+					handleMouseover(event, d);
+				}}
+				on:mouseout={function () {
+					handleMouseout();
+				}}
 			/>
 		{/each}
 	</g>
 </svg>
 
+{#if $hoveredDatapoint != undefined}
+	<Tooltip {screenWidth} {screenHeight} />
+{/if}
+
 <style>
-	/* You can add styles here if needed */
 </style>
