@@ -10,7 +10,8 @@
 	let screenWidth;
 	let screenHeight;
 
-	let nepos = data.nepos;
+	// let nepos = data.nepos;
+	let nepodata = data.data;
 
 	function resize() {
 		screenWidth = window.innerWidth;
@@ -26,4 +27,4 @@
 
 <svelte:window on:resize={resize} />
 
-<Grid data={nepos} {screenHeight} {screenWidth} />
+<Grid data={nepodata} {screenHeight} {screenWidth} />

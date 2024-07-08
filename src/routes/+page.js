@@ -21,7 +21,15 @@ export const load = ({ fetch }) => {
 		return data;
 	};
 
+	const fetchNepoOutput = async () => {
+		const res = await fetch('/data/output.json');
+		const data = await res.json();
+
+		return data;
+	};
+
 	return {
-		nepos: fetchNepoData()
+		// nepos: fetchNepoData(),
+		data: fetchNepoOutput()
 	};
 };

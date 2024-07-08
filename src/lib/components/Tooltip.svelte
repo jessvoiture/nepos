@@ -34,7 +34,10 @@
           width: {tooltipWidth}px;"
 >
 	<div class="tooltip-content body-text">
-		<p>{$hoveredDatapoint.title}, {$hoveredDatapoint.year}</p>
+		<div class="tooltip-header">
+			<div class="tooltip-title">{$hoveredDatapoint.title}, {$hoveredDatapoint.year}</div>
+			<!-- <div class="tooltip-percentage">{Math.round($hoveredDatapoint.pct_nepo * 100)}%</div> -->
+		</div>
 	</div>
 
 	<div class="tooltip-image">
@@ -64,12 +67,13 @@
 	}
 
 	.tooltip-image img {
-		width: 100%;
+		width: 100px;
+		height: auto;
 	}
 
-	.tooltip-content p {
-		margin: 0;
-		padding: 0;
-		color: #6b5b6a;
+	.tooltip-header {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
 	}
 </style>
