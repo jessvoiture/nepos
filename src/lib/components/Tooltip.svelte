@@ -8,7 +8,7 @@
 	let adjustedMouseY;
 
 	let tooltipWidth = 200;
-	let tooltipHeight = 350;
+	let tooltipHeight = 200;
 
 	if ($mouseX + tooltipWidth + 50 < screenWidth) {
 		adjustedMouseX = $mouseX + 10;
@@ -36,7 +36,11 @@
 	<div class="tooltip-content body-text">
 		<div class="tooltip-header">
 			<div class="tooltip-title">{$hoveredDatapoint.title}, {$hoveredDatapoint.year}</div>
-			<!-- <div class="tooltip-percentage">{Math.round($hoveredDatapoint.pct_nepo * 100)}%</div> -->
+			<div class="tooltip-percentage">
+				{$hoveredDatapoint.nepoCount}/{$hoveredDatapoint.cast_len} ({Math.round(
+					($hoveredDatapoint.nepoCount / $hoveredDatapoint.cast_len) * 100
+				)}%)
+			</div>
 		</div>
 	</div>
 
@@ -49,6 +53,14 @@
 				loading="lazy"
 			/>
 		</div>
+	</div>
+
+	<div class="cast-list">
+		<ul>
+			{#each $hoveredDatapoint.cast as d}
+				<li>{d.name}, {d.nepo}</li>
+			{/each}
+		</ul>
 	</div>
 </div>
 
